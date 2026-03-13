@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TranKey - Gestión de Servicios Vehiculares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0066FF',
+                        'primary-dark': '#0052CC',
+                        'primary-light': '#E6F0FF',
+                        'gray-bg': '#F5F7FA',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.15);
+        }
+
+        .service-card.selected {
+            border-color: #0066FF;
+            background-color: #E6F0FF;
+        }
+
+        .time-slot:hover {
+            background-color: #E6F0FF;
+            color: #0066FF;
+        }
+
+        .time-slot.selected {
+            background-color: #0066FF;
+            color: white;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-bg min-h-screen">
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                        <i class="fas fa-key text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-800">Tran<span class="text-primary">Key</span></span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#" class="text-primary font-medium">Dashboard</a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition">Mis Vehículos</a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition">Historial</a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition">Pagos</a>
+                </nav>
+
+                <!-- Search & Profile -->
+                <div class="flex items-center gap-4">
+                    <div class="hidden lg:flex items-center bg-gray-100 rounded-full px-4 py-2 gap-2">
+                        <i class="fas fa-search text-gray-400"></i>
+                        <input type="text" placeholder="Buscar servicios, talleres..."
+                            class="bg-transparent border-none text-sm w-48 focus:outline-none">
+                    </div>
+                    <button class="relative p-2 text-gray-500 hover:text-primary transition">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div
+                        class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
+                        NM
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Programar Servicio</h1>
+            <p class="text-gray-500">Complete los detalles para agendar su cita de servicio vehicular</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Main Form Area -->
+            <div class="flex-1 space-y-6">
+
+                <!-- Step 1: Vehicle Selection (Modificado a Formulario) -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            1</div>
+                        <h2 class="text-xl font-semibold text-gray-800">Información del Vehículo</h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                            <input type="text" id="vehicleBrand" oninput="updateVehicleSummary()"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                placeholder="Ej: Toyota">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                            <input type="text" id="vehicleModel" oninput="updateVehicleSummary()"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                placeholder="Ej: Corolla">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Placa</label>
+                            <input type="text" id="vehiclePlate"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition uppercase"
+                                placeholder="Ej: AB123CD">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Service Selection (Modificado para múltiple selección) -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            2</div>
+                        <h2 class="text-xl font-semibold text-gray-800">Seleccione el(los) Servicio(s)</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'battery', 'Batería', 45)">
+                            <div class="w-12 h-12 bg-primary-light rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-car-battery text-primary text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Batería</h3>
+                            <p class="text-sm text-gray-500">Revisión y cambio</p>
+                        </div>
+
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'oil', 'Aceite', 35)">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-oil-can text-yellow-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Aceite</h3>
+                            <p class="text-sm text-gray-500">Cambio de aceite</p>
+                        </div>
+
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'brakes', 'Frenos', 80)">
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-compact-disc text-red-500 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Frenos</h3>
+                            <p class="text-sm text-gray-500">Inspección y ajuste</p>
+                        </div>
+
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'tires', 'Neumáticos', 60)">
+                            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-circle text-gray-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Neumáticos</h3>
+                            <p class="text-sm text-gray-500">Rotación y balanceo</p>
+                        </div>
+
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'diagnostic', 'Diagnóstico', 50)">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-microchip text-green-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Diagnóstico</h3>
+                            <p class="text-sm text-gray-500">Escaneo completo</p>
+                        </div>
+
+                        <div class="service-card border-2 border-gray-200 rounded-xl p-4 cursor-pointer transition"
+                            onclick="toggleService(this, 'general', 'Mantenimiento', 120)">
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                                <i class="fas fa-wrench text-purple-600 text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-800">Mantenimiento</h3>
+                            <p class="text-sm text-gray-500">Servicio general</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Describe Issue -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            3</div>
+                        <h2 class="text-xl font-semibold text-gray-800">Describa el Problema o Falla</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Problema</label>
+                            <select id="issueType"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition">
+                                <option value="">Seleccione una opción</option>
+                                <option value="preventivo">Mantenimiento Preventivo</option>
+                                <option value="ruido">Ruido Extraño</option>
+                                <option value="luces">Luces de Advertencia</option>
+                                <option value="arranque">Problema de Arranque</option>
+                                <option value="frenado">Problema de Frenado</option>
+                                <option value="suspension">Problema de Suspensión</option>
+                                <option value="electrico">Problema Eléctrico</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción Detallada del
+                                Servicio/Falla</label>
+                            <textarea id="issueDescription" rows="4"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 resize-none transition"
+                                placeholder="Por favor describa con detalle el problema que está experimentando con su vehículo, síntomas, cuándo ocurre, etc..."></textarea>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje Actual</label>
+                                <input type="number" id="mileage"
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                    placeholder="Ej: 45000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Urgencia</label>
+                                <select id="urgency"
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition">
+                                    <option value="normal">Normal</option>
+                                    <option value="alta">Alta - Lo antes posible</option>
+                                    <option value="emergencia">Emergencia</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Date and Time -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            4</div>
+                        <h2 class="text-xl font-semibold text-gray-800">Fecha y Hora</h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt text-primary mr-2"></i>Seleccione la Fecha
+                            </label>
+                            <input type="date" id="serviceDate"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clock text-primary mr-2"></i>Horarios Disponibles
+                            </label>
+                            <div class="grid grid-cols-3 gap-2" id="timeSlots">
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">8:00 AM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">9:00 AM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">10:00 AM</button>
+                                <button type="button"
+                                    class="time-slot selected px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium transition"
+                                    onclick="selectTime(this)">10:30 AM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">11:30 AM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">2:00 PM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">3:00 PM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">4:00 PM</button>
+                                <button type="button"
+                                    class="time-slot px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition"
+                                    onclick="selectTime(this)">5:00 PM</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Contact Info -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            5</div>
+                        <h2 class="text-xl font-semibold text-gray-800">Información de Contacto</h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                            <input type="text" id="fullName"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                placeholder="Juan Pérez">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                            <input type="tel" id="phone"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                placeholder="+58 412 123 4567">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+                            <input type="email" id="email"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-700 transition"
+                                placeholder="correo@ejemplo.com">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar (Modificado para ser Sticky) -->
+            <div class="lg:w-96 space-y-6 lg:sticky lg:top-28 h-fit">
+                <!-- Location Card -->
+                <div class="bg-white rounded-2xl overflow-hidden card-shadow">
+                    <div class="h-48 bg-gray-300 relative">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125419.29953879956!2d-66.95432065!3d10.4805937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8c2a58adcd824807%3A0x93dd2eae0a998483!2sCaracas%2C%20Venezuela!5e0!3m2!1sen!2sus!4v1699999999999!5m2!1sen!2sus"
+                            class="w-full h-full border-0 grayscale" allowfullscreen="" loading="lazy">
+                        </iframe>
+                        <div class="absolute top-3 left-3 bg-white rounded-lg px-3 py-1.5 shadow-md">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-xs font-medium text-gray-700">GPS Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-map-marker-alt text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-gray-800">TranKey Service Center</p>
+                                <p class="text-sm text-gray-500">Av. Principal, Centro Comercial Plaza, Local 15</p>
+                                <p class="text-sm text-gray-500">Caracas, Venezuela</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen del Servicio</h3>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start pb-3 border-b border-gray-100">
+                            <span class="text-gray-500 whitespace-nowrap">Servicio(s)</span>
+                            <span class="font-medium text-gray-800 text-right ml-4" id="summaryService">Ninguno</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                            <span class="text-gray-500">Vehículo</span>
+                            <span class="font-medium text-gray-800 text-right" id="summaryVehicle">Por definir</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                            <span class="text-gray-500">Fecha</span>
+                            <span class="font-medium text-gray-800" id="summaryDate">Por definir</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                            <span class="text-gray-500">Hora</span>
+                            <span class="font-medium text-gray-800" id="summaryTime">10:30 AM</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-gray-800 font-semibold">Precio Estimado</span>
+                            <span class="text-2xl font-bold text-primary" id="summaryPrice">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button onclick="confirmBooking()"
+                        class="w-full mt-6 bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-xl transition flex items-center justify-center gap-2">
+                        <span>Confirmar Servicio</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                    <p class="text-xs text-gray-400 text-center mt-3">El precio final puede variar según el diagnóstico
+                    </p>
+                </div>
+
+                <!-- Help Card -->
+                <div class="bg-primary-light rounded-2xl p-5">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-headset text-white"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">¿Necesita Ayuda?</p>
+                            <p class="text-sm text-gray-600 mt-1">Nuestro equipo está disponible 24/7 para asistirle</p>
+                            <a href="tel:+582121234567"
+                                class="inline-flex items-center gap-2 text-primary font-medium text-sm mt-2 hover:underline">
+                                <i class="fas fa-phone"></i>
+                                +58 212 123 4567
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 mt-12">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-key text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-gray-800">TranKey</span>
+                </div>
+                <div class="flex items-center gap-6 text-sm text-gray-500">
+                    <a href="#" class="hover:text-primary transition">Términos de Uso</a>
+                    <a href="#" class="hover:text-primary transition">Privacidad</a>
+                    <a href="#" class="hover:text-primary transition">Cookies</a>
+                </div>
+                <p class="text-sm text-gray-400">© 2024 TranKey. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-green-500 text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">¡Servicio Programado!</h3>
+            <p class="text-gray-600 mb-6">Su cita ha sido confirmada exitosamente. Recibirá un correo de confirmación
+                con los detalles.</p>
+            <button onclick="closeModal()"
+                class="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-xl transition">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedServices = [];
+        let selectedTime = '10:30 AM';
+
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('serviceDate').valueAsDate = tomorrow;
+        updateSummaryDate();
+
+        // Actualizar resumen de vehículo
+        function updateVehicleSummary() {
+            const brand = document.getElementById('vehicleBrand').value.trim();
+            const model = document.getElementById('vehicleModel').value.trim();
+            const summary = document.getElementById('summaryVehicle');
+
+            if (brand || model) {
+                summary.textContent = `${brand} ${model}`.trim();
+            } else {
+                summary.textContent = 'Por definir';
+            }
+        }
+
+        // Lógica de múltiples servicios
+        function toggleService(element, id, name, price) {
+            const index = selectedServices.findIndex(s => s.id === id);
+
+            if (index > -1) {
+                // Si ya está seleccionado, lo quitamos
+                selectedServices.splice(index, 1);
+                element.classList.remove('selected');
+                element.classList.add('border-gray-200');
+            } else {
+                // Si no está seleccionado, lo agregamos
+                selectedServices.push({ id, name, price });
+                element.classList.add('selected');
+                element.classList.remove('border-gray-200');
+            }
+
+            updateServiceSummary();
+        }
+
+        function updateServiceSummary() {
+            const summaryService = document.getElementById('summaryService');
+            const summaryPrice = document.getElementById('summaryPrice');
+
+            if (selectedServices.length === 0) {
+                summaryService.textContent = 'Ninguno';
+                summaryPrice.textContent = '$0.00';
+            } else {
+                const total = selectedServices.reduce((sum, service) => sum + service.price, 0);
+                const names = selectedServices.map(s => s.name).join(', ');
+                summaryService.textContent = names;
+                summaryPrice.textContent = `$${total}.00`;
+            }
+        }
+
+        function selectTime(element) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedTime = element.textContent;
+            document.getElementById('summaryTime').textContent = selectedTime;
+        }
+
+        function updateSummaryDate() {
+            const dateInput = document.getElementById('serviceDate');
+            if (dateInput.value) {
+                const date = new Date(dateInput.value + 'T00:00:00');
+                const options = { weekday: 'short', day: 'numeric', month: 'short' };
+                document.getElementById('summaryDate').textContent = date.toLocaleDateString('es-ES', options);
+            }
+        }
+
+        document.getElementById('serviceDate').addEventListener('change', updateSummaryDate);
+
+        function confirmBooking() {
+            const brand = document.getElementById('vehicleBrand').value;
+            const plate = document.getElementById('vehiclePlate').value;
+            const description = document.getElementById('issueDescription').value;
+            const fullName = document.getElementById('fullName').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+
+            if (!brand.trim() || !plate.trim()) {
+                alert('Por favor, ingrese la marca y placa de su vehículo.');
+                document.getElementById('vehicleBrand').focus();
+                return;
+            }
+
+            if (selectedServices.length === 0) {
+                alert('Por favor, seleccione al menos un servicio.');
+                return;
+            }
+
+            if (!description.trim()) {
+                alert('Por favor, describa el problema o servicio que necesita.');
+                document.getElementById('issueDescription').focus();
+                return;
+            }
+
+            if (!fullName.trim() || !phone.trim() || !email.trim()) {
+                alert('Por favor, complete toda la información de contacto.');
+                return;
+            }
+
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
